@@ -10,8 +10,8 @@
 
 - Создаем папку проекта `mysite`
 - Копируем в эту папку: `src`, `gulpfile.js`, `package.json`
-- В консоли переходит в папку `mysite`
+- В консоли переходим в папку `mysite`
 - Набираем `npm install`
-- `gulp`
+- Набираем `gulp`
 
 Если выдаст ошибку, то установите конвертер: `npm install webp-converter@2.2.3 --save-dev`

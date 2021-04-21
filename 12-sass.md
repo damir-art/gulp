@@ -26,8 +26,11 @@
         gulp.watch([path.watch.css], css)   // Браузер обновляется при изменении SCSS-файлов
     }
 
-    let build = gulp.series(clean, gulp.parallel(css, html)) // В параметрах прописываем функции, которые должны выполняться при команде запуске gulp и изменениях в файлах
-    let watch = gulp.parallel(build, watchFiles, browserSync) // Пишем в консоли gulp, запускается gulp, слежения, browser-sync
+    // В параметрах прописываем функции, которые должны выполняться при команде запуске gulp и изменениях в файлах
+    let build = gulp.series(clean, gulp.parallel(css, html))
+
+    // Пишем в консоли gulp, запускается gulp, слежения, browser-sync
+    let watch = gulp.parallel(build, watchFiles, browserSync)
 
     exports.css     = css
 

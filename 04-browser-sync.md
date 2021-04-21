@@ -1,5 +1,7 @@
 # browser sync
-Установка browsersync для gulp `npm install browser-sync --save-dev`
+Установка **browsersync** для **gulp**: 
+
+    npm install browser-sync --save-dev
 
 **browser sync** - плагин обновляющий страницу
 
@@ -8,7 +10,7 @@
     // Переменные помогающие в написании сценария, помимо установки плагинов, список переменных пополняется
     let { src, dest } = require('gulp'), // gulp присваивается переменным
         gulp = require('gulp'),          // Для выполнения отдельных задач
-        browsersync = require('browser-sync').create()
+        browsersync = require('browser-sync').create() // Переменная для `browser-sync` 
 
     // Функция обновляющая страницу, имя функции дожно оличаться от имени переменной поэтому через `camelCase`
     function browserSync(params) {
@@ -27,3 +29,6 @@
     let watch       = gulp.parallel(browserSync)
     exports.watch   = watch
     exports.default = watch // Выполняется при запуске gulp
+
+После введения команды `gulp` должен открыться браузер со страницей где в `title` выводится `error`.
+Чтобы данной ошибки не было, нам нужно создать код который создаст папку `dist` и файл `index.html` в ней.

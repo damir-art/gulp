@@ -2,7 +2,7 @@
 Добавляет префиксы для CSS-свойств.
 
 - https://www.npmjs.com/package/gulp-autoprefixer
-- `npm install --save-dev gulp-autoprefixer`
+- `npm install gulp-autoprefixer --save-dev`
 
 Код:
 

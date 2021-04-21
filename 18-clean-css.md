@@ -1,5 +1,5 @@
 # clean-css
-Чистит и сжимает CSS-файл. Создаём два файла, один сжатый, другой нет, для этого нужно установить еще один плагин: `rename`
+Чистит и сжимает CSS-файл.
 
 - https://www.npmjs.com/package/gulp-clean-css
 - `npm install gulp-clean-css --save-dev`
@@ -29,3 +29,5 @@
             .pipe(dest(path.build.css))
             .pipe(browsersync.stream()) // Обновляем страницу
     }
+
+Нам нужно саоздать два CSS-файла, один сжатый `.min.css`, другой нет, для этого нужно установить плагин `rename`.
