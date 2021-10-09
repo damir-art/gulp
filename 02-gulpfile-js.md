@@ -9,7 +9,7 @@
 
 После создания структуры папок и файлов проекта, проверяем работу `gulpfile.js`,  с помощью тестового кода.
 
-В `gulpfile.js` прописываем следующий код:
+Создаём файл `gulpfile.js`. В `gulpfile.js` прописываем следующий код:
 
     function defaultTask(cb) {
         // place code for your default task here
