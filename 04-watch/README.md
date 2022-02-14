@@ -1,6 +1,16 @@
 # Watch
 Слежение за файлами.
 
+- Таски срабатывают при изменении файлов.
+- Таск `watch()` должен всегда запускаться последним.
+    - поэтому в `gulpfile.js` размещаем его ниже и позже всех
+- Watch обычно следит за файлами:
+    - pug
+    - scss
+    - js (main.js)
+    - изображений
+- В конце каждого таска вставляем `.pipe(browserSync.stream())` кроме тасков изображений, шрифтов и библиотек
+
 Создаём таск watch():
 
     function watch() {
@@ -9,22 +19,6 @@
 
     const devTasks  = gulp.parallel(pug2html, scss2css) // таски запускаются параллельно
     exports.default = gulp.series(devTasks, watch)
-
-## Устанавливаем browser-sync
-
-    npm install browser-sync gulp --save-dev
-
-Записываем в `gulpfile.js`:
-
-    const browserSync = require('browser-sync').create()
-
-    function watch() {
-        browserSync.init({
-            server: {
-                baseDir: "dist"
-            }
-        })
-    }
 
 ## При изменении файлов запускаем таски
 
@@ -64,8 +58,6 @@
         gulp.watch('app/scss/**/*.scss', scss2css)
     }
 
-    const devTasks = gulp.parallel(pug2html, scss2css) // таски запускаются параллельно
+    const devTasks = gulp.parallel(pug2html, scss2css) // указываем чтобы таски запускались параллельно
     exports.default = gulp.series(devTasks, watch)
 
-## Разное
-- таск watch() должен всегда запускаться последним
