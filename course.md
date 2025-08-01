@@ -6,8 +6,12 @@
 - plugins.md - популярные плагины
 - html-template-engine.md - html шаблонизаторы
 - gulpfile-js.md - gulpfile.js
+- project/ - проект с нуля
 
 Разное:
 - series-parallel.md - gulp.series(), gulp.parallel()
 - package-scripts.md - про команду скриптс
 - gulpfile-js-methods.md - методы галп
+- npx.md - локальный вызов gulp
+- postinstall.md - скрипт запускается автоматически после npm install
+- fonts.md - работа со шрифтами
