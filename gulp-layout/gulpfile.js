@@ -17,7 +17,6 @@ import imagemin from 'gulp-imagemin';
 import webp from 'gulp-webp';
 import avif from 'gulp-avif';
 import rename from 'gulp-rename';
-import htmlmin from 'gulp-htmlmin';
 import gulpIf from 'gulp-if';
 import pug from 'gulp-pug';
 import groupMediaQueries from 'gulp-group-css-media-queries';
@@ -60,7 +59,7 @@ export function cleanDist() {
 
 // 📦 assets → copyAssets
 export function copyAssets() {
-  return src(paths.assets.src, { base: paths.assets.base })
+  return src(paths.assets.src, { base: paths.assets.base, encoding: false })
     .pipe(dest(paths.assets.dest));
 }
 
@@ -138,19 +137,13 @@ export function serve() {
   watch(paths.images.src, { ignoreInitial: false }, processImages);
 }
 
-// 🧱 build — обновлена под новые названия
-export const build = isProd
-  ? series(
-    cleanDist,
-    parallel(copyAssets, compilePug, compileScss, processJs, processImages),
-    parallel(convertWebp, convertAvif)
-  )
-  : series(
-    cleanDist,
-    parallel(copyAssets, compilePug, compileScss, processJs, processImages)
-  );
+// 🧱 npm run build: build - для production
+export const build = series(
+  cleanDist,
+  parallel(copyAssets, compilePug, compileScss, processJs, processImages, convertWebp, convertAvif)
+);
 
-// 🚀 default — тоже обновлена
+// 🚀 npm run dev: default — для разработки
 export default series(
   cleanDist,
   parallel(copyAssets, compilePug, compileScss, processJs, processImages),
