@@ -1,162 +1,158 @@
+// ✅ Добавлены переменные srcFolder и distFolder
+const srcFolder = 'src';
+const distFolder = 'dist';
+
 // Импортируем Gulp и современные плагины (ES-модули)
-import { src, dest, watch, series, parallel } from 'gulp';    // Основные функции Gulp
-import browserSyncLib from 'browser-sync';                    // BrowserSync для live reload
-import { deleteAsync } from 'del';                            // del для очистки dist
-import gulpSass from 'gulp-sass';                             // gulp-sass для SCSS
-import * as dartSass from 'sass';                             // sass-движок для gulp-sass
-import autoprefixer from 'gulp-autoprefixer';                 // Автопрефиксер для CSS
-import cleanCSS from 'gulp-clean-css';                        // Минификация CSS
-import terser from 'gulp-terser';                             // Современная минификация JS
-import plumber from 'gulp-plumber';                           // Для обработки ошибок
-import sourcemaps from 'gulp-sourcemaps';                     // Source maps для отладки
-import imagemin from 'gulp-imagemin';                         // Минификация изображений
-import webp from 'gulp-webp';                                 // Конвертация изображений в WebP
-import avif from 'gulp-avif';                                 // Конвертация изображений в AVIF
-import rename from 'gulp-rename';                             // Переименование файлов
-import htmlmin from 'gulp-htmlmin';                           // Минификация HTML
-import gulpIf from 'gulp-if';                                 // Условное выполнение задач
-import pug from 'gulp-pug';                                   // Pug для шаблонизации HTML
-import groupMediaQueries from 'gulp-group-css-media-queries'; // Группировка медиа-запросов в CSS
+import { src, dest, watch, series, parallel } from 'gulp';
+import browserSyncLib from 'browser-sync';
+import { deleteAsync } from 'del';
+import gulpSass from 'gulp-sass';
+import * as dartSass from 'sass';
+import autoprefixer from 'gulp-autoprefixer';
+import cleanCSS from 'gulp-clean-css';
+import terser from 'gulp-terser';
+import plumber from 'gulp-plumber';
+import sourcemaps from 'gulp-sourcemaps';
+import imagemin from 'gulp-imagemin';
+import webp from 'gulp-webp';
+import avif from 'gulp-avif';
+import rename from 'gulp-rename';
+import htmlmin from 'gulp-htmlmin';
+import gulpIf from 'gulp-if';
+import pug from 'gulp-pug';
+import groupMediaQueries from 'gulp-group-css-media-queries';
 
-const browserSync = browserSyncLib.create(); // Создаем экземпляр BrowserSync
-const sass = gulpSass(dartSass); // Используем dart-sass как движок для gulp-sass
+const browserSync = browserSyncLib.create();
+const sass = gulpSass(dartSass);
 
-const isProd = process.env.NODE_ENV === 'production'; // Определяем, в продакшене ли мы
-console.log(`⚙️  Gulp running in ${isProd ? '🚀 production' : '🧪 development'} mode`); // Логируем режим работы
+const isProd = process.env.NODE_ENV === 'production';
+console.log(`⚙️  Gulp running in ${isProd ? '🚀 production' : '🧪 development'} mode`);
 
-// Используем объект для хранения путей к файлам
 const paths = {
   assets: {
-    src: 'src/assets/**/*',
-    base: 'src/assets',
-    dest: 'dist/'
+    src: `${srcFolder}/assets/**/*`,
+    base: `${srcFolder}/assets`,
+    dest: `${distFolder}/`
   },
   pug: {
-    src: 'src/pug/**/*.pug',
-    pages: 'src/pug/pages/*.pug',
-    dest: 'dist/'
+    src: `${srcFolder}/pug/**/*.pug`,
+    pages: `${srcFolder}/pug/pages/*.pug`,
+    dest: `${distFolder}/`
   },
   scss: {
-    src: 'src/scss/**/*.scss',
-    dest: 'dist/css/'
+    src: `${srcFolder}/scss/**/*.scss`,
+    dest: `${distFolder}/css/`
   },
   js: {
-    src: 'src/js/**/*.js',
-    dest: 'dist/js/'
+    src: `${srcFolder}/js/**/*.js`,
+    dest: `${distFolder}/js/`
   },
   images: {
-    src: 'src/img/**/*.{jpg,jpeg,png,svg,gif,webp}',
-    dest: 'dist/img/'
+    src: `${srcFolder}/img/**/*.{jpg,jpeg,png,svg,gif,webp}`,
+    dest: `${distFolder}/img/`
   }
 };
 
-// Очистка папки dist
-// npx gulp clean - самостоятельная задача для очистки dist
-export function clean() { // Удаляем папку dist
-  // console.log('🧹 Cleaning dist folder...');
-  return deleteAsync(['dist']);
+// 🧹 clean → cleanDist
+export function cleanDist() {
+  return deleteAsync([distFolder]);
 }
 
-// Копирование статических файлов (assets) в папку dist
-// npx gulp assets - самостоятельная задача для копирования статических файлов
-export function assets() {
+// 📦 assets → copyAssets
+export function copyAssets() {
   return src(paths.assets.src, { base: paths.assets.base })
     .pipe(dest(paths.assets.dest));
 }
 
-// Компиляция Pug в HTML с обработкой ошибок
-// npx gulp pugToHtml - самостоятельная задача для компиляции Pug в HTML
-export function pugToHtml() {
-  return src(paths.pug.pages) // Чтение Pug страниц
+// 🧱 pugToHtml → compilePug
+export function compilePug() {
+  return src(paths.pug.pages)
     .pipe(plumber())
-    .pipe(pug({ pretty: !isProd })) // pretty для удобочитаемого HTML в dev режиме
+    .pipe(pug({ pretty: !isProd }))
     .pipe(dest(paths.pug.dest))
     .pipe(browserSync.stream());
 }
 
-// Компиляция SCSS, автопрефиксер, минификация, source maps, обработка ошибок
-export function scssTask() {
-  return src(paths.scss.src) 
-    .pipe(plumber()) // Обработка ошибок
-    .pipe(sourcemaps.init()) // Инициализация source maps
-    .pipe(sass().on('error', sass.logError)) // Компиляция SCSS с логированием ошибок
-    .pipe(groupMediaQueries()) // Группировка медиа-запросов
-    .pipe(autoprefixer()) // Автопрефиксер для кроссбраузерности
-    .pipe(gulpIf(isProd, cleanCSS())) // Минификация CSS только в продакшене
-    .pipe(sourcemaps.write('.')) // Запись source maps
-    .pipe(rename({ suffix: '.min' })) // Переименование файла с добавлением .min
-    .pipe(dest(paths.scss.dest)) // Сохранение в папку dist/css
-    .pipe(browserSync.stream()); // Обновление браузера в реальном времени
+// 🎨 scssTask → compileScss
+export function compileScss() {
+  return src(paths.scss.src)
+    .pipe(plumber())
+    .pipe(gulpIf(!isProd, sourcemaps.init()))         // ✅ Только для dev: инициализация sourcemaps
+    .pipe(sass().on('error', sass.logError))
+    .pipe(groupMediaQueries())
+    .pipe(autoprefixer())
+    .pipe(gulpIf(isProd, cleanCSS()))                 // ✅ Только для prod: минификация CSS
+    .pipe(gulpIf(!isProd, sourcemaps.write('.')))     // ✅ Только для dev: запись sourcemaps
+    .pipe(gulpIf(isProd, rename({ suffix: '.min' }))) // ✅ Только для prod: добавляем суффикс .min
+    .pipe(dest(paths.scss.dest))
+    .pipe(browserSync.stream());
 }
 
-// Копирование и минификация JS с обработкой ошибок и source maps
-export function js() {
+// ⚙️ js → processJs
+export function processJs() {
   return src(paths.js.src)
     .pipe(plumber())
-    .pipe(sourcemaps.init())
-    .pipe(gulpIf(isProd, terser())) // Минификация JS только в продакшене
-    .pipe(sourcemaps.write('.'))
-    .pipe(rename({ suffix: '.min' }))
+    .pipe(gulpIf(!isProd, sourcemaps.init()))         // ✅ Только для dev: инициализация sourcemaps
+    .pipe(gulpIf(isProd, terser()))                   // ✅ Только для prod: минификация JS
+    .pipe(gulpIf(!isProd, sourcemaps.write('.')))     // ✅ Только для dev: запись sourcemaps
+    .pipe(gulpIf(isProd, rename({ suffix: '.min' }))) // ✅ Только для prod: добавляем суффикс .min
     .pipe(dest(paths.js.dest))
     .pipe(browserSync.stream());
 }
 
-// Копирование изображений (можно добавить минификацию через gulp-imagemin)
-export function images() {
+// 🖼 images → processImages
+export function processImages() {
   return src(paths.images.src, { encoding: false })
-    .pipe(gulpIf(isProd, imagemin())) // Минификация изображений только в продакшене
-    .pipe(dest(paths.images.dest))
-    //.pipe(browserSync.stream()); // Если нужно обновлять изображения в реальном времени
+    .pipe(gulpIf(isProd, imagemin()))
+    .pipe(dest(paths.images.dest));
 }
 
-// Конвертация изображений в WebP
-// npx gulp convertWebp - самостоятельная задача для конвертации изображений в WebP
+// 💾 convertWebp — без изменений
 export function convertWebp() {
   return src(paths.images.src, { encoding: false })
     .pipe(webp())
     .pipe(dest(paths.images.dest));
 }
 
-// Конвертация изображений в AVIF
-// npx gulp convertAvif - самостоятельная задача для конвертации изображений в AV
+// 💾 convertAvif — без изменений
 export function convertAvif() {
   return src(paths.images.src, { encoding: false })
     .pipe(avif())
     .pipe(dest(paths.images.dest));
 }
 
-// Запуск сервера и слежение за файлами
+// 🔁 serve — без изменений
 export function serve() {
   browserSync.init({
     server: {
-      baseDir: 'dist'
+      baseDir: distFolder
     },
     notify: false,
     port: 3000
   });
 
-  watch(paths.assets.src, { ignoreInitial: false }, assets);
-  watch(paths.pug.src, { ignoreInitial: false }, pugToHtml);
-  watch(paths.scss.src, { ignoreInitial: false }, scssTask);
-  watch(paths.js.src, { ignoreInitial: false }, js);
-  watch(paths.images.src, { ignoreInitial: false }, images);
+  watch(paths.assets.src, { ignoreInitial: false }, copyAssets);
+  watch(paths.pug.src, { ignoreInitial: false }, compilePug);
+  watch(paths.scss.src, { ignoreInitial: false }, compileScss);
+  watch(paths.js.src, { ignoreInitial: false }, processJs);
+  watch(paths.images.src, { ignoreInitial: false }, processImages);
 }
 
-// Сборка проекта
+// 🧱 build — обновлена под новые названия
 export const build = isProd
   ? series(
-    clean,
-    parallel(assets, pugToHtml, scssTask, js, images),
+    cleanDist,
+    parallel(copyAssets, compilePug, compileScss, processJs, processImages),
     parallel(convertWebp, convertAvif)
   )
   : series(
-    clean,
-    parallel(assets, pugToHtml, scssTask, js, images),
+    cleanDist,
+    parallel(copyAssets, compilePug, compileScss, processJs, processImages)
   );
 
-// Задача по умолчанию: сборка + сервер + слежение
+// 🚀 default — тоже обновлена
 export default series(
-  clean,
-  parallel(assets, pugToHtml, scssTask, js, images),
+  cleanDist,
+  parallel(copyAssets, compilePug, compileScss, processJs, processImages),
   serve
 );
